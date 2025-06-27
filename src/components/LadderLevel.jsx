@@ -45,12 +45,25 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
 
   return (
     <motion.div
-      className={`ladder-level w-full p-4 ${isCompleted ? 'level-completed' : ''}`}
+      className={`castle-level w-full p-6 bg-gray-700 text-white relative overflow-hidden`}
       whileHover={canInteract ? { scale: 1.02 } : {}}
       transition={{ type: 'spring', stiffness: 300 }}
     >
+      {/* Castle Wall Background */}
+      <div className="absolute inset-0 bg-stone-800 border-4 border-stone-700 rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+        {/* Battlements */}
+        <div className="absolute top-0 left-0 w-full h-6 bg-stone-700 flex justify-around">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="w-4 h-6 bg-stone-800" />
+          ))}
+        </div>
+        {/* Wall Texture */}
+        <div className="absolute inset-6 bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%23444444/%3E%3Cpath d=%22M0 0h100v10H0zm0 20h100v10H0zm0 20h100v10H0zm0 20h100v10H0z%22 fill=%23333333/%3E%3C/svg%3E')] opacity-50" />
+
+      </div>
+
       {/* Level Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 relative z-10">
         <div className="flex items-center space-x-4">
           <div className="text-2xl font-bold text-neon-cyan pixel-text">
             LEVEL {level}
@@ -73,7 +86,7 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
       </div>
 
       {/* Doors */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 w-full relative z-10">
         {[0, 1, 2].map((doorIndex) => (
           <Door
             key={doorIndex}
@@ -85,6 +98,10 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
             showResult={showResult}
             isCorrect={showResult && game.safeDoors && game.safeDoors[level] === doorIndex}
             position={doorIndex === 0 ? 'left' : doorIndex === 1 ? 'middle' : 'right'}
+            frameColor={doorIndex === 0 ? 'purple' : doorIndex === 1 ? 'gray' : 'beige'}
+            doorColor={level % 3 === 0 ? 'red' : 'brown'}
+            type={level % 5 === 0 && doorIndex === 1 ? 'prison' : 'standard'}
+            isOpen={selectedDoor === doorIndex && !showResult}
           />
         ))}
       </div>
@@ -94,7 +111,7 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-center space-x-2"
+          className="flex justify-center space-x-2 relative z-10"
         >
           {playersAtLevel.map(player => (
             <PlayerAvatar
@@ -108,7 +125,7 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
       )}
 
       {/* Level Platform */}
-      <div className="mt-2 h-2 bg-gradient-to-r from-neon-cyan/30 via-neon-cyan/50 to-neon-cyan/30 rounded-full" />
+      <div className="mt-2 h-2 bg-gradient-to-r from-neon-cyan/30 via-neon-cyan/50 to-neon-cyan/30 rounded-full relative z-10" />
     </motion.div>
   )
 }

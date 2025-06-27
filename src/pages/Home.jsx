@@ -285,14 +285,14 @@ const Home = () => {
 
         {/* Particles Background */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-          {Array.from({ length: 50 }).map((_, i) => (
+          {Array.from({ length: 500 }).map((_, i) => (
             <div
               key={i}
               className="particle animate-glow-flicker"
               style={{
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${8 + Math.random() * 4}s`,
+                animationDuration: `${8 + Math.random() * 25}s`,
               }}
             />
           ))}

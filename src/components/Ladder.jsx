@@ -27,7 +27,7 @@ const Ladder = ({ game, currentPlayer, onDoorSelect, onBribe }) => {
         </motion.div>
 
         {/* Ladder Levels */}
-        <div className="space-y-4">
+        <div className="space-y-4 w-[90%] mx-auto">
           {levels.map((level, index) => (
             <motion.div
               key={level}
@@ -46,6 +46,7 @@ const Ladder = ({ game, currentPlayer, onDoorSelect, onBribe }) => {
             </motion.div>
           ))}
         </div>
+
 
         {/* Starting Platform */}
         <motion.div
