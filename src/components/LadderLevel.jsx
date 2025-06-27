@@ -45,7 +45,7 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
 
   return (
     <motion.div
-      className={`ladder-level p-4 ${isCompleted ? 'level-completed' : ''}`}
+      className={`ladder-level w-full p-4 ${isCompleted ? 'level-completed' : ''}`}
       whileHover={canInteract ? { scale: 1.02 } : {}}
       transition={{ type: 'spring', stiffness: 300 }}
     >
@@ -73,7 +73,7 @@ const LadderLevel = ({ level, game, currentPlayer, onDoorSelect, onBribe, isActi
       </div>
 
       {/* Doors */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 w-full">
         {[0, 1, 2].map((doorIndex) => (
           <Door
             key={doorIndex}

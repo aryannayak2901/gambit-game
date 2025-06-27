@@ -23,7 +23,7 @@ export const SocketProvider = ({ children }) => {
 
   // Initialize socket connection
   useEffect(() => {
-    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'
+    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
     const newSocket = io(serverUrl, {
       transports: ['websocket', 'polling'],
     })
@@ -45,76 +45,33 @@ export const SocketProvider = ({ children }) => {
       toast.error(error.message || 'Connection error')
     })
 
-    // Game event listeners
-    newSocket.on('gameCreated', (data) => {
-      console.log('Game created:', data)
-      dispatch({ type: 'SET_GAME', payload: data.game })
-    })
 
-    newSocket.on('playerJoined', (data) => {
-      console.log('Player joined:', data)
-      dispatch({ type: 'UPDATE_PLAYERS', payload: data.game.players })
-      toast.success(`${data.player.name} joined the game`)
-    })
-
-    newSocket.on('gameStarted', (data) => {
-      console.log('Game started:', data)
-      dispatch({ type: 'SET_GAME_STATUS', payload: 'playing' })
-      toast.success('Game started! Choose your doors wisely!')
-    })
-
-    newSocket.on('doorSelected', (data) => {
-      console.log('Door selected:', data)
-      const { playerId, doorIndex, level, result, game } = data
-      
+    // LOBBY & GAME EVENTS (sync with backend)
+    newSocket.on('lobby_update', (game) => {
       dispatch({ type: 'SET_GAME', payload: game })
-      
-      if (result === 'advance') {
-        toast.success(`Player advanced to level ${level + 1}!`)
-      } else if (result === 'eliminated') {
-        toast.error(`Player was eliminated!`)
+    })
+    newSocket.on('game_start', (game) => {
+      dispatch({ type: 'SET_GAME', payload: game })
+      dispatch({ type: 'SET_GAME_STATUS', payload: 'playing' })
+      toast.success('Game started!')
+    })
+    newSocket.on('game_update', (game) => {
+      dispatch({ type: 'SET_GAME', payload: game })
+      if (game.status === 'finished') {
+        toast.success('Game finished!')
       }
     })
+    newSocket.on('chat_message', (msg) => {
+      setMessages(prev => [...prev, msg])
+    })
 
-    newSocket.on('gameFinished', (data) => {
-      console.log('Game finished:', data)
+    // Legacy/compat events (optional)
+    newSocket.on('gameCreated', (data) => {
       dispatch({ type: 'SET_GAME', payload: data.game })
-      toast.success(`🎉 Game finished! Winner gets ${data.pot} GORBA!`)
     })
-
-    newSocket.on('playerEliminated', () => {
-      toast.error('💀 You were eliminated!')
-    })
-
-    newSocket.on('levelAdvanced', (data) => {
-      toast.success(`🎯 Advanced to level ${data.nextLevel}!`)
-    })
-
-    newSocket.on('bribeUsed', (data) => {
-      toast.success(`💰 Bribe used for level ${data.level}!`)
-    })
-
-    newSocket.on('playerUsedBribe', (data) => {
-      const { playerId, level, game } = data
-      dispatch({ type: 'SET_GAME', payload: game })
-      toast.info(`Player used a bribe on level ${level}`)
-    })
-
-    newSocket.on('playerLeft', (data) => {
-      console.log('Player left:', data)
-      dispatch({ type: 'SET_GAME', payload: data.game })
-      toast.info('A player left the game')
-    })
-
-    newSocket.on('playerDisconnected', (data) => {
-      console.log('Player disconnected:', data)
-      dispatch({ type: 'SET_GAME', payload: data.game })
-      toast.warning('A player disconnected')
-    })
-
-    newSocket.on('newMessage', (message) => {
-      console.log('New message:', message)
-      setMessages(prev => [...prev, message])
+    newSocket.on('playerJoined', (data) => {
+      dispatch({ type: 'UPDATE_PLAYERS', payload: data.game.players })
+      toast.success(`${data.player.name} joined the game`)
     })
 
     setSocket(newSocket)
@@ -125,75 +82,50 @@ export const SocketProvider = ({ children }) => {
   }, [dispatch])
 
   // Socket actions
-  const createGame = (playerName, gorbaBalance = 10) => {
+
+  // Multiplayer actions (sync with backend server)
+  const createGame = (gameId, player) => {
     if (!socket || !connected) {
       toast.error('Not connected to server')
       return
     }
-
-    socket.emit('createGame', {
-      playerName,
-      walletAddress: publicKey?.toString(),
-      gorbaBalance,
-    })
+    socket.emit('join_lobby', { gameId, player })
   }
-
-  const joinGame = (gameId, playerName, gorbaBalance = 10) => {
+  const joinGame = (gameId, player) => {
     if (!socket || !connected) {
       toast.error('Not connected to server')
       return
     }
-
-    socket.emit('joinGame', {
-      gameId,
-      playerName,
-      walletAddress: publicKey?.toString(),
-      gorbaBalance,
-    })
+    socket.emit('join_lobby', { gameId, player })
   }
-
-  const selectDoor = (gameId, doorIndex, level) => {
+  const selectDoor = (gameId, playerId, level, doorIndex) => {
     if (!socket || !connected) {
       toast.error('Not connected to server')
       return
     }
-
-    socket.emit('selectDoor', {
-      gameId,
-      doorIndex,
-      level,
-    })
+    socket.emit('select_door', { gameId, playerId, level, doorIndex })
   }
-
-  const useBribe = (gameId, level) => {
+  const useBribe = (gameId, playerId, level) => {
     if (!socket || !connected) {
       toast.error('Not connected to server')
       return
     }
-
-    socket.emit('useBribe', {
-      gameId,
-      level,
-    })
+    socket.emit('use_bribe', { gameId, playerId, level })
   }
-
-  const sendMessage = (message) => {
+  const sendMessage = (gameId, player, message) => {
     if (!socket || !connected) {
       toast.error('Not connected to server')
       return
     }
-
     if (message.trim()) {
-      socket.emit('sendMessage', { message: message.trim() })
+      socket.emit('send_message', { gameId, player, message: message.trim() })
     }
   }
-
-  const leaveGame = () => {
+  const leaveGame = (gameId, playerId) => {
     if (!socket || !connected) {
       return
     }
-
-    socket.emit('leaveGame')
+    socket.emit('leave_game', { gameId, playerId })
     setMessages([])
   }
 

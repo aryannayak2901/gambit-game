@@ -9,19 +9,19 @@ const Ladder = ({ game, currentPlayer, onDoorSelect, onBribe }) => {
   const levels = Array.from({ length: 10 }, (_, i) => 10 - i) // 10 to 1
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto">
+    <div className="relative w-[90vw] max-w-6xl min-w-0 arcade-panel mx-auto flex flex-col items-center justify-center p-0">
       {/* Ladder Structure */}
-      <div className="relative bg-gradient-to-b from-space-blue/50 to-deep-purple/50 rounded-2xl border-2 border-neon-cyan/30 p-6 backdrop-blur-sm">
+      <div className="w-full flex flex-col items-center justify-center">
         {/* Game Title */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6"
+          className="text-center mb-4 w-full"
         >
           <h1 className="text-4xl font-bold text-neon-yellow pixel-text animate-glow">
             LUCKY LADDERS
           </h1>
-          <div className="text-neon-cyan text-lg mt-2">
+          <div className="text-neon-cyan text-lg mt-2 pixel-text">
             Level {Math.max(...game.players.map(p => p.position))} / 10
           </div>
         </motion.div>
@@ -99,10 +99,10 @@ const Ladder = ({ game, currentPlayer, onDoorSelect, onBribe }) => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 1.4, type: 'spring' }}
-          className="absolute top-4 right-4 bg-gradient-to-r from-neon-yellow/20 to-neon-pink/20 rounded-lg p-3 border border-neon-yellow/50"
+          className="mt-2 mb-4 mx-auto bg-gradient-to-r from-neon-yellow/20 to-neon-pink/20 rounded-lg p-3 border border-neon-yellow/50 flex flex-col items-center"
         >
-          <div className="text-neon-yellow font-bold text-sm">POT</div>
-          <div className="text-2xl font-bold text-neon-yellow animate-pulse">
+          <div className="text-neon-yellow font-bold text-sm pixel-text">POT</div>
+          <div className="text-2xl font-bold text-neon-yellow animate-pulse pixel-text">
             {game.pot} GORBA
           </div>
         </motion.div>

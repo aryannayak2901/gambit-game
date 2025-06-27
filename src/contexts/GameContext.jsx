@@ -140,42 +140,42 @@ export const GameProvider = ({ children }) => {
   const { publicKey, connected } = useWallet()
 
   // Game actions
+  const TEST_MODE = import.meta.env.VITE_TEST_MODE === 'true';
   const createGame = async (playerName) => {
-    if (!connected || !publicKey) {
+    if (!TEST_MODE && (!connected || !publicKey)) {
       toast.error('Please connect your wallet first')
       return null
     }
 
     dispatch({ type: 'SET_LOADING', payload: true })
-    
     try {
-      // In a real implementation, this would interact with the smart contract
-      const gameId = Math.random().toString(36).substring(2, 15)
+      // In test mode, use mock wallet and player
+      const playerId = TEST_MODE ? `dev-${Math.random().toString(36).substring(2, 8)}` : publicKey.toString();
       const player = {
-        id: publicKey.toString(),
+        id: playerId,
         name: playerName,
-        address: publicKey.toString(),
+        address: playerId,
         color: 'blue',
         position: 1,
         status: 'active',
-        gorbaBalance: 10, // Mock balance
+        gorbaBalance: 99,
         bribes: 0,
         selectedDoor: null,
       }
 
+      const gameId = Math.random().toString(36).substring(2, 15)
       const game = {
         id: gameId,
         players: [player],
         status: 'waiting',
         currentLevel: 1,
-        pot: 3, // Entry fee
+        pot: 3,
         safeDoors: generateSafeDoors(),
         createdAt: Date.now(),
       }
 
       dispatch({ type: 'SET_GAME', payload: game })
       dispatch({ type: 'SET_PLAYER', payload: player })
-      
       toast.success('Game created successfully!')
       return gameId
     } catch (error) {
@@ -189,23 +189,23 @@ export const GameProvider = ({ children }) => {
   }
 
   const joinGame = async (gameId, playerName) => {
-    if (!connected || !publicKey) {
+    if (!TEST_MODE && (!connected || !publicKey)) {
       toast.error('Please connect your wallet first')
       return false
     }
 
     dispatch({ type: 'SET_LOADING', payload: true })
-    
     try {
       // Mock joining game logic
+      const playerId = TEST_MODE ? `dev-${Math.random().toString(36).substring(2, 8)}` : publicKey.toString();
       const player = {
-        id: publicKey.toString(),
+        id: playerId,
         name: playerName,
-        address: publicKey.toString(),
-        color: 'red', // Will be assigned by server
+        address: playerId,
+        color: 'red',
         position: 1,
         status: 'active',
-        gorbaBalance: 10,
+        gorbaBalance: 99,
         bribes: 0,
         selectedDoor: null,
       }
@@ -269,7 +269,8 @@ export const GameProvider = ({ children }) => {
   }
 
   const useBribe = async (level) => {
-    if (!state.currentPlayer || state.currentPlayer.gorbaBalance < 1) {
+    // In test mode, allow infinite bribes
+    if (!TEST_MODE && (!state.currentPlayer || state.currentPlayer.gorbaBalance < 1)) {
       toast.error('Insufficient GORBA balance')
       return false
     }

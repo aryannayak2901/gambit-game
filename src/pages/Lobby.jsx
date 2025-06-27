@@ -1,3 +1,4 @@
+const TEST_MODE = import.meta.env.VITE_TEST_MODE === 'true';
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -27,7 +28,7 @@ const Lobby = () => {
   // Start countdown when 3 players join
   useEffect(() => {
     if (currentGame?.players?.length === 3 && currentGame.status === 'waiting') {
-      setCountdown(5)
+      setCountdown(TEST_MODE ? 1 : 5)
       const timer = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
@@ -36,8 +37,7 @@ const Lobby = () => {
           }
           return prev - 1
         })
-      }, 1000)
-      
+      }, TEST_MODE ? 200 : 1000)
       return () => clearInterval(timer)
     }
   }, [currentGame?.players?.length, currentGame?.status])
@@ -79,31 +79,49 @@ const Lobby = () => {
 
   if (!currentGame) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="loading-spinner mx-auto mb-4" />
-          <div className="text-neon-cyan text-lg">Loading game...</div>
+      <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
+        {/* CRT/Arcade overlays intensified */}
+        <div className="crt-effect">
+          <div className="crt-scanlines"></div>
+          <div className="crt-glow"></div>
+          <div className="crt-static"></div>
+        </div>
+        <div className="arcade-bg-pixel absolute inset-0 w-full h-full z-0 pointer-events-none animate-bg-float"></div>
+        <div className="arcade-sprite-overlay absolute inset-0 w-full h-full z-10 pointer-events-none"></div>
+        <div className="absolute inset-0 w-full h-full z-20 pointer-events-none"></div>
+        <div className="text-center relative z-30">
+          <div className="loading-spinner mx-auto mb-4 animate-glow-flicker" />
+          <div className="text-neon-cyan text-lg pixel-text retro-glow animate-glow-flicker">Loading game...</div>
         </div>
       </div>
-    )
-  }
+    );
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen p-4 bg-black relative overflow-hidden">
+      {/* CRT/Arcade overlays intensified */}
+      <div className="crt-effect">
+        <div className="crt-scanlines"></div>
+        <div className="crt-glow"></div>
+        <div className="crt-static"></div>
+      </div>
+      <div className="arcade-bg-pixel absolute inset-0 w-full h-full z-0 pointer-events-none animate-bg-float"></div>
+      <div className="arcade-sprite-overlay absolute inset-0 w-full h-full z-10 pointer-events-none"></div>
+      <div className="absolute inset-0 w-full h-full z-20 pointer-events-none"></div>
+      <div className="max-w-4xl mx-auto relative z-30">
+        {/* Header - arcade style */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl md:text-6xl font-bold text-neon-yellow pixel-text animate-glow mb-4">
-            GAME LOBBY
+          <h1 className="text-5xl md:text-7xl font-bold pixel-text retro-glow animate-glow mb-2 drop-shadow-neon animate-crt-flicker tracking-widest text-neon-cyan">
+            <span className="block text-neon-yellow animate-glow-flicker">GAME</span>
+            <span className="block text-neon-pink animate-glow-flicker">LOBBY</span>
           </h1>
-          <div className="flex items-center justify-center space-x-4 text-neon-cyan">
-            <span className="text-lg">Game ID:</span>
-            <div className="flex items-center space-x-2 bg-black/30 rounded-lg px-4 py-2 border border-neon-cyan/50">
-              <span className="font-mono text-xl font-bold">{gameId}</span>
+          <div className="flex items-center justify-center space-x-4 text-neon-cyan mt-2">
+            <span className="text-lg pixel-text">Game ID:</span>
+            <div className="flex items-center space-x-2 bg-black/50 rounded-lg px-4 py-2 border-2 border-neon-cyan/80 retro-border shadow-lg">
+              <span className="font-mono text-xl font-bold text-neon-yellow">{gameId}</span>
               <motion.button
                 onClick={copyGameId}
                 className="text-neon-cyan hover:text-neon-pink transition-colors"
@@ -116,35 +134,33 @@ const Lobby = () => {
           </div>
         </motion.div>
 
-        {/* Main Lobby Panel */}
+        {/* Main Lobby Panel - neon arcade style */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="game-panel p-8 mb-6"
+          className="game-panel retro-border p-8 mb-6 shadow-2xl animate-crt-flicker"
         >
           {/* Game Status */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-4 mb-4">
-              <Users className="w-6 h-6 text-neon-cyan" />
+              <Users className="w-6 h-6 text-neon-cyan animate-pulse" />
               <span className="text-2xl font-bold text-neon-cyan">
                 {currentGame.players.length}/3 PLAYERS
               </span>
             </div>
-            
             {countdown && (
               <motion.div
                 key={countdown}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
-                className="countdown-number text-6xl font-bold text-neon-yellow mb-4"
+                className="countdown-number text-6xl font-bold text-neon-yellow mb-4 animate-glow-flicker"
               >
                 {countdown}
               </motion.div>
             )}
-            
-            <div className="text-lg text-neon-pink">
+            <div className="text-lg text-neon-pink pixel-text animate-glow-flicker">
               {currentGame.players.length < 3 
                 ? 'Waiting for more players to join...'
                 : countdown 
@@ -154,7 +170,7 @@ const Lobby = () => {
             </div>
           </div>
 
-          {/* Players Grid */}
+          {/* Players Grid - neon arcade style */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <AnimatePresence>
               {Array.from({ length: 3 }).map((_, index) => {
@@ -167,9 +183,9 @@ const Lobby = () => {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.1 }}
                     className={`
-                      relative p-6 rounded-lg border-2 transition-all duration-300
+                      relative p-6 rounded-lg border-2 transition-all duration-300 neon-panel
                       ${player 
-                        ? 'bg-gradient-to-b from-neon-cyan/10 to-neon-pink/10 border-neon-cyan' 
+                        ? 'bg-gradient-to-b from-neon-cyan/10 to-neon-pink/10 border-neon-cyan retro-border shadow-xl animate-crt-flicker' 
                         : 'bg-gray-800/30 border-gray-600 border-dashed'
                       }
                     `}
@@ -182,10 +198,10 @@ const Lobby = () => {
                           size="lg"
                         />
                         <div>
-                          <div className="font-bold text-lg text-white mb-1">
+                          <div className="font-bold text-lg text-white mb-1 pixel-text">
                             {player.name}
                           </div>
-                          <div className="text-sm text-gray-400">
+                          <div className="text-sm text-gray-400 font-mono">
                             {player.address.slice(0, 8)}...
                           </div>
                           <div className="text-sm text-neon-yellow font-bold mt-2">
@@ -214,24 +230,24 @@ const Lobby = () => {
             </AnimatePresence>
           </div>
 
-          {/* Game Info */}
+          {/* Game Info - neon arcade style */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="bg-black/30 rounded-lg p-4 border border-neon-cyan/30">
-              <div className="text-neon-cyan font-bold text-sm mb-1">ENTRY FEE</div>
-              <div className="text-2xl font-bold text-neon-yellow">3 GORBA</div>
+            <div className="bg-black/30 rounded-lg p-4 border border-neon-cyan/30 retro-border">
+              <div className="text-neon-cyan font-bold text-sm mb-1 pixel-text">ENTRY FEE</div>
+              <div className="text-2xl font-bold text-neon-yellow pixel-text">3 GORBA</div>
             </div>
-            <div className="bg-black/30 rounded-lg p-4 border border-neon-pink/30">
-              <div className="text-neon-pink font-bold text-sm mb-1">TOTAL POT</div>
-              <div className="text-2xl font-bold text-neon-yellow">{currentGame.pot} GORBA</div>
+            <div className="bg-black/30 rounded-lg p-4 border border-neon-pink/30 retro-border">
+              <div className="text-neon-pink font-bold text-sm mb-1 pixel-text">TOTAL POT</div>
+              <div className="text-2xl font-bold text-neon-yellow pixel-text">{currentGame.pot} GORBA</div>
             </div>
-            <div className="bg-black/30 rounded-lg p-4 border border-neon-green/30">
-              <div className="text-neon-green font-bold text-sm mb-1">LEVELS</div>
-              <div className="text-2xl font-bold text-neon-yellow">10</div>
+            <div className="bg-black/30 rounded-lg p-4 border border-neon-green/30 retro-border">
+              <div className="text-neon-green font-bold text-sm mb-1 pixel-text">LEVELS</div>
+              <div className="text-2xl font-bold text-neon-yellow pixel-text">10</div>
             </div>
           </div>
         </motion.div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - neon arcade style */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -240,7 +256,7 @@ const Lobby = () => {
         >
           <motion.button
             onClick={shareGame}
-            className="neon-button border-neon-green text-neon-green hover:bg-neon-green/10"
+            className="neon-button border-neon-green text-neon-green hover:bg-neon-green/10 pixel-text retro-glow animate-glow-flicker"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -249,10 +265,9 @@ const Lobby = () => {
               <span>SHARE GAME</span>
             </div>
           </motion.button>
-          
           <motion.button
             onClick={handleLeaveGame}
-            className="neon-button border-red-400 text-red-400 hover:bg-red-400/10"
+            className="neon-button border-red-400 text-red-400 hover:bg-red-400/10 pixel-text retro-glow animate-glow-flicker"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -263,14 +278,14 @@ const Lobby = () => {
           </motion.button>
         </motion.div>
 
-        {/* Game Rules */}
+        {/* Game Rules - neon arcade style */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mt-8 game-panel p-6"
+          className="mt-8 game-panel retro-border p-6 shadow-xl animate-crt-flicker"
         >
-          <h3 className="text-xl font-bold text-neon-cyan mb-4 text-center">GAME RULES</h3>
+          <h3 className="text-xl font-bold text-neon-cyan mb-4 text-center pixel-text">GAME RULES</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
             <div>
               <div className="text-neon-yellow font-bold mb-2">🎯 OBJECTIVE</div>
@@ -292,7 +307,7 @@ const Lobby = () => {
         </motion.div>
       </div>
 
-      {/* Chat */}
+      {/* ChatBox and Particles */}
       <ChatBox
         messages={messages}
         onSendMessage={sendMessage}
@@ -300,13 +315,11 @@ const Lobby = () => {
         isMinimized={isChatMinimized}
         onToggleMinimize={() => setIsChatMinimized(!isChatMinimized)}
       />
-
-      {/* Particles */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         {Array.from({ length: 30 }).map((_, i) => (
           <div
             key={i}
-            className="particle"
+            className="particle animate-glow-flicker"
             style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 8}s`,
@@ -318,5 +331,6 @@ const Lobby = () => {
     </div>
   )
 }
+}
 
-export default Lobby
+export default Lobby;

@@ -9,6 +9,10 @@ import Lobby from './pages/Lobby'
 import Game from './pages/Game'
 import Leaderboard from './pages/Leaderboard'
 import Profile from './pages/Profile'
+import Playground from './pages/Playground'
+
+import DevTools from './components/DevTools'
+const TEST_MODE = import.meta.env.VITE_TEST_MODE === 'true';
 
 function App() {
   return (
@@ -17,22 +21,33 @@ function App() {
         <SocketProvider>
           <Router>
             <div className="min-h-screen bg-space-gradient bg-crt-lines relative overflow-hidden">
-              {/* CRT Scanline Effect */}
-              <div className="fixed inset-0 pointer-events-none z-50">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-cyan/5 to-transparent animate-scanline"></div>
+              {/* --- PIXEL ART ARCADE BACKGROUND --- */}
+              <div className="arcade-bg-pixel absolute inset-0 w-full h-full z-0 pointer-events-none"></div>
+
+              {/* CRT/Arcade Scanline & Glow Effect */}
+              <div className="crt-effect">
+                <div className="crt-scanlines"></div>
+                <div className="crt-glow"></div>
               </div>
-              
+
+              {/* --- ANIMATED SPRITE OVERLAY --- */}
+              <div className="arcade-sprite-overlay absolute inset-0 w-full h-full z-10 pointer-events-none"></div>
+
               {/* Main Content */}
-              <div className="relative z-10">
+              <div className="relative z-20">
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/lobby/:gameId" element={<Lobby />} />
                   <Route path="/game/:gameId" element={<Game />} />
                   <Route path="/leaderboard" element={<Leaderboard />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/playground" element={<Playground />} />
                 </Routes>
               </div>
-              
+
+              {/* DevTools Overlay for TEST MODE */}
+              {TEST_MODE && <DevTools />}
+
               {/* Toast Notifications */}
               <Toaster
                 position="top-center"
